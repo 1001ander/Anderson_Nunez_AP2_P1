@@ -1,3 +1,5 @@
+
+
 package edu.ucne.anderson_nunez_ap2_p1.presentation.navigation
 
 import androidx.compose.runtime.Composable
@@ -18,39 +20,30 @@ fun MainNavHost(
     ) {
         composable<Screen.BorrameList> {
             ListBorrameScreen(
-                borrames = emptyList(),
-                onAddClick = {
 
+                onAddClick = {
                     navHostController.navigate(Screen.EditBorrame(borrameId = null))
                 },
                 onItemClick = { id ->
-
                     navHostController.navigate(Screen.EditBorrame(borrameId = id))
                 }
             )
         }
 
+        composable<Screen.EditBorrame> { backStackEntry ->
+            val args = backStackEntry.toRoute<Screen.EditBorrame>()
 
-        composable<Screen.EditBorrame> {
-            val args = it.toRoute<Screen.EditBorrame>()
-            val borrameId = args.borrameId
 
             EditBorrameScreen(
-                nombre = "",
-                descripcion = "",
-                onNombreChange = {},
-                onDescripcionChange = {},
-                onSaveClick = {
 
+                onSaveClick = {
                     navHostController.navigateUp()
                 },
                 onDeleteClick = {
-
                     navHostController.navigateUp()
                 },
-                isNew = borrameId == null
+                isNew = args.borrameId == null
             )
         }
     }
 }
-
