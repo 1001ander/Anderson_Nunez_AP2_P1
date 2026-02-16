@@ -7,8 +7,8 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
-import edu.ucne.anderson_nunez_ap2_p1.presentation.borrame.edit.EditBorrameScreen
-import edu.ucne.anderson_nunez_ap2_p1.presentation.borrame.list.ListBorrameScreen
+//import edu.ucne.anderson_nunez_ap2_p1.presentation.borrame.edit.EditBorrameScreen
+//import edu.ucne.anderson_nunez_ap2_p1.presentation.borrame.list.ListBorrameScreen
 
 @Composable
 fun MainNavHost(
@@ -19,7 +19,7 @@ fun MainNavHost(
         startDestination = Screen.BorrameList
     ) {
         composable<Screen.BorrameList> {
-            ListBorrameScreen(
+      /*      ListBorrameScreen(
 
                 onAddClick = {
                     navHostController.navigate(Screen.EditBorrame(borrameId = null))
@@ -27,14 +27,14 @@ fun MainNavHost(
                 onItemClick = { id ->
                     navHostController.navigate(Screen.EditBorrame(borrameId = id))
                 }
-            )
+            )*/
         }
 
         composable<Screen.EditBorrame> { backStackEntry ->
             val args = backStackEntry.toRoute<Screen.EditBorrame>()
 
 
-            EditBorrameScreen(
+        /*    EditBorrameScreen(
 
                 onSaveClick = {
                     navHostController.navigateUp()
@@ -43,7 +43,7 @@ fun MainNavHost(
                     navHostController.navigateUp()
                 },
                 isNew = args.borrameId == null
-            )
+            )*/
         }
     }
 }
