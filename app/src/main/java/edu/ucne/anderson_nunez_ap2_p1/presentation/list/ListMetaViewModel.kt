@@ -1,9 +1,9 @@
-package edu.ucne.anderson_nunez_ap2_p1.presentation.list
+package edu.ucne.anderson_nunez_ap2_p1.presentation.metas.list
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import edu.ucne.anderson_nunez_ap2_p1.domain.usecase.ObserveMetasUseCase
+import edu.ucne.anderson_nunez_ap2_p1.domain.metas.repository.MetaRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -12,7 +12,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ListMetaViewModel @Inject constructor(
-    private val observeMetasUseCase: ObserveMetasUseCase
+    private val repository: MetaRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ListMetaUiState())
@@ -50,7 +50,7 @@ class ListMetaViewModel @Inject constructor(
             val descripcion = _uiState.value.descripcionFilter.ifBlank { null }
             val observaciones = _uiState.value.observacionesFilter.ifBlank { null }
 
-            observeMetasUseCase(descripcion, observaciones).collect { metas ->
+            repository.observeFiltered(descripcion, observaciones).collect { metas ->
                 val total = metas.size
                 val suma = metas.sumOf { it.monto }
 

@@ -1,4 +1,4 @@
-package edu.ucne.anderson_nunez_ap2_p1.presentation.edit
+package edu.ucne.anderson_nunez_ap2_p1.presentation.metas.edit
 
 data class EditMetaUiState(
     val idMeta: Int? = null,

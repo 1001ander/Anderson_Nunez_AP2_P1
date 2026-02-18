@@ -1,4 +1,4 @@
-package edu.ucne.anderson_nunez_ap2_p1.presentation.list
+package edu.ucne.anderson_nunez_ap2_p1.presentation.metas.list
 
 sealed interface ListMetaUiEvent {
     data class DescripcionFilterChanged(val descripcion: String) : ListMetaUiEvent
