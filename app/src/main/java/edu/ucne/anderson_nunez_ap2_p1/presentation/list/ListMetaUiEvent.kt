@@ -5,4 +5,5 @@ sealed interface ListMetaUiEvent {
     data class ObservacionesFilterChanged(val observaciones: String) : ListMetaUiEvent
     data object Refresh : ListMetaUiEvent
     data object ClearFilters : ListMetaUiEvent
+    data class DeleteMeta(val id: Int) : ListMetaUiEvent
 }

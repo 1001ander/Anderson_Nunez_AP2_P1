@@ -7,6 +7,9 @@ import androidx.navigation.toRoute
 import dagger.hilt.android.lifecycle.HiltViewModel
 import edu.ucne.anderson_nunez_ap2_p1.domain.metas.model.Meta
 import edu.ucne.anderson_nunez_ap2_p1.domain.metas.repository.MetaRepository
+import edu.ucne.anderson_nunez_ap2_p1.domain.metas.usecase.DeleteMetaUseCase
+import edu.ucne.anderson_nunez_ap2_p1.domain.metas.usecase.GetMetaUseCase
+import edu.ucne.anderson_nunez_ap2_p1.domain.metas.usecase.UpsertMetaUseCase
 import edu.ucne.anderson_nunez_ap2_p1.presentation.navigation.Screen
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -16,6 +19,9 @@ import javax.inject.Inject
 
 @HiltViewModel
 class EditMetaViewModel @Inject constructor(
+    private val getMetaUseCase: GetMetaUseCase,
+    private val upsertMetaUseCase: UpsertMetaUseCase,
+    private val deleteMetaUseCase: DeleteMetaUseCase,
     private val repository: MetaRepository,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
@@ -57,7 +63,7 @@ class EditMetaViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
 
-            val meta = repository.getMeta(id)
+            val meta = getMetaUseCase(id)
 
             _uiState.update {
                 it.copy(
@@ -119,7 +125,7 @@ class EditMetaViewModel @Inject constructor(
                 monto = monto!!
             )
 
-            repository.upsert(meta)
+            upsertMetaUseCase(meta)
 
             _uiState.update {
                 it.copy(isLoading = false, success = true)
@@ -130,7 +136,7 @@ class EditMetaViewModel @Inject constructor(
     private fun delete() {
         viewModelScope.launch {
             _uiState.value.idMeta?.let { id ->
-                repository.delete(id)
+                deleteMetaUseCase(id)
                 _uiState.update { it.copy(success = true) }
             }
         }
