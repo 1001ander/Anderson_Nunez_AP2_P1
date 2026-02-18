@@ -67,7 +67,6 @@ fun ListMetaBody(
                 .padding(padding)
                 .padding(16.dp)
         ) {
-
             Text(
                 text = "Filtros",
                 style = MaterialTheme.typography.titleMedium,
@@ -104,7 +103,6 @@ fun ListMetaBody(
 
             Spacer(Modifier.height(16.dp))
 
-            // Lista de metas
             if (uiState.isLoading) {
                 Box(
                     modifier = Modifier
@@ -148,7 +146,6 @@ fun ListMetaBody(
 
             Spacer(Modifier.height(16.dp))
 
-            // Totales
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(

@@ -1,16 +1,16 @@
-package edu.ucne.anderson_nunez_ap2_p1.presentation.edit
+package edu.ucne.anderson_nunez_ap2_p1.presentation.metas.edit
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.toRoute
 import dagger.hilt.android.lifecycle.HiltViewModel
-import edu.ucne.anderson_nunez_ap2_p1.data.mapper.toEntity
-import edu.ucne.anderson_nunez_ap2_p1.data.mapper.toDomain
-import edu.ucne.anderson_nunez_ap2_p1.domain.model.Meta
-import edu.ucne.anderson_nunez_ap2_p1.domain.usecase.DeleteMetaUseCase
-import edu.ucne.anderson_nunez_ap2_p1.domain.usecase.GetMetaUseCase
-import edu.ucne.anderson_nunez_ap2_p1.domain.usecase.UpsertMetaUseCase
-import edu.ucne.anderson_nunez_ap2_p1.domain.usecase.MetaValidations
+import edu.ucne.anderson_nunez_ap2_p1.domain.metas.model.Meta
+import edu.ucne.anderson_nunez_ap2_p1.domain.metas.repository.MetaRepository
+import edu.ucne.anderson_nunez_ap2_p1.domain.metas.usecase.DeleteMetaUseCase
+import edu.ucne.anderson_nunez_ap2_p1.domain.metas.usecase.GetMetaUseCase
+import edu.ucne.anderson_nunez_ap2_p1.domain.metas.usecase.UpsertMetaUseCase
+import edu.ucne.anderson_nunez_ap2_p1.presentation.navigation.Screen
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -22,89 +22,123 @@ class EditMetaViewModel @Inject constructor(
     private val getMetaUseCase: GetMetaUseCase,
     private val upsertMetaUseCase: UpsertMetaUseCase,
     private val deleteMetaUseCase: DeleteMetaUseCase,
-    private val metaValidations: MetaValidations,
+    private val repository: MetaRepository,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(EditMetaUiState())
     val uiState = _uiState.asStateFlow()
 
-    private val metaId: Int = savedStateHandle.get<Int>("metaId") ?: 0
-
     init {
+        val metaId = savedStateHandle.toRoute<Screen.EditMeta>().metaId
         if (metaId > 0) {
-            loadMeta(metaId)
+            onEvent(EditMetaUiEvent.LoadMeta(metaId))
         }
     }
 
     fun onEvent(event: EditMetaUiEvent) {
         when (event) {
             is EditMetaUiEvent.DescripcionChanged -> {
-                _uiState.update { it.copy(descripcion = event.descripcion, descripcionError = null) }
+                _uiState.update {
+                    it.copy(descripcion = event.descripcion, descripcionError = null)
+                }
             }
             is EditMetaUiEvent.ObservacionesChanged -> {
-                _uiState.update { it.copy(observaciones = event.observaciones, observacionesError = null) }
+                _uiState.update {
+                    it.copy(observaciones = event.observaciones, observacionesError = null)
+                }
             }
             is EditMetaUiEvent.MontoChanged -> {
-                _uiState.update { it.copy(monto = event.monto, montoError = null) }
+                _uiState.update {
+                    it.copy(monto = event.monto, montoError = null)
+                }
             }
             is EditMetaUiEvent.LoadMeta -> loadMeta(event.idMeta)
-            is EditMetaUiEvent.Save -> save()
-            is EditMetaUiEvent.Delete -> delete()
-            is EditMetaUiEvent.ClearErrors -> clearErrors()
+            EditMetaUiEvent.Save -> save()
+            EditMetaUiEvent.Delete -> delete()
         }
     }
 
     private fun loadMeta(id: Int) {
         viewModelScope.launch {
-            getMetaUseCase(id)?.let { meta ->
-                _uiState.update {
-                    it.copy(
-                        idMeta = meta.idMeta,
-                        descripcion = meta.descripcion,
-                        observaciones = meta.observaciones,
-                        monto = meta.monto.toString()
-                    )
-                }
+            _uiState.update { it.copy(isLoading = true) }
+
+            val meta = getMetaUseCase(id)
+
+            _uiState.update {
+                it.copy(
+                    idMeta = meta?.idMeta,
+                    descripcion = meta?.descripcion ?: "",
+                    observaciones = meta?.observaciones ?: "",
+                    monto = meta?.monto?.toString() ?: "",
+                    isLoading = false
+                )
             }
         }
     }
 
     private fun save() {
-        viewModelScope.launch {
-            val state = _uiState.value
-            val validationResult = metaValidations.validate(
-                id = state.idMeta ?: 0,
-                descripcion = state.descripcion,
-                observaciones = state.observaciones,
-                monto = state.monto
-            )
+        val descripcion = _uiState.value.descripcion.trim()
+        val observaciones = _uiState.value.observaciones.trim()
+        val montoStr = _uiState.value.monto.trim()
+        val idMeta = _uiState.value.idMeta
 
-            if (!validationResult.successful) {
-                _uiState.update { it.copy(errorMessage = validationResult.errorMessage) }
+        var hasError = false
+
+        if (descripcion.isBlank()) {
+            _uiState.update { it.copy(descripcionError = "La descripción es requerida") }
+            hasError = true
+        }
+
+        if (observaciones.isBlank()) {
+            _uiState.update { it.copy(observacionesError = "Las observaciones son requeridas") }
+            hasError = true
+        }
+
+        val monto = montoStr.toDoubleOrNull()
+        if (monto == null || monto <= 0) {
+            _uiState.update { it.copy(montoError = "El monto debe ser un número mayor a 0") }
+            hasError = true
+        }
+
+        if (hasError) return
+
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+
+            val exists = repository.existsByDescripcion(descripcion, idMeta)
+
+            if (exists) {
+                _uiState.update {
+                    it.copy(
+                        descripcionError = "Ya existe una meta con esta descripción",
+                        isLoading = false
+                    )
+                }
                 return@launch
             }
 
             val meta = Meta(
-                idMeta = state.idMeta ?: 0,
-                descripcion = state.descripcion,
-                observaciones = state.observaciones,
-                monto = state.monto.toDoubleOrNull() ?: 0.0
+                idMeta = idMeta ?: 0,
+                descripcion = descripcion,
+                observaciones = observaciones,
+                monto = monto!!
             )
 
             upsertMetaUseCase(meta)
-            _uiState.update { it.copy(success = true) }
+
+            _uiState.update {
+                it.copy(isLoading = false, success = true)
+            }
         }
     }
 
     private fun delete() {
         viewModelScope.launch {
-            _uiState.value.idMeta?.let { deleteMetaUseCase(it) }
-            _uiState.update { it.copy(success = true) }
+            _uiState.value.idMeta?.let { id ->
+                deleteMetaUseCase(id)
+                _uiState.update { it.copy(success = true) }
+            }
         }
-    }
-
-    private fun clearErrors() {
-        _uiState.update { it.copy(descripcionError = null, observacionesError = null, montoError = null, errorMessage = null) }
     }
 }

@@ -1,4 +1,4 @@
-package edu.ucne.anderson_nunez_ap2_p1.presentation.edit
+package edu.ucne.anderson_nunez_ap2_p1.presentation.metas.edit
 
 sealed interface EditMetaUiEvent {
     data class DescripcionChanged(val descripcion: String) : EditMetaUiEvent
@@ -7,5 +7,4 @@ sealed interface EditMetaUiEvent {
     data class LoadMeta(val idMeta: Int) : EditMetaUiEvent
     data object Save : EditMetaUiEvent
     data object Delete : EditMetaUiEvent
-    data object ClearErrors : EditMetaUiEvent
 }

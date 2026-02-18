@@ -7,7 +7,7 @@ import javax.inject.Inject
 class UpsertMetaUseCase @Inject constructor(
     private val repository: MetaRepository
 ) {
-    suspend operator fun invoke(meta: Meta): Int {
-        return repository.upsert(meta)
+    suspend operator fun invoke(meta: Meta) {
+        repository.upsert(meta)
     }
 }

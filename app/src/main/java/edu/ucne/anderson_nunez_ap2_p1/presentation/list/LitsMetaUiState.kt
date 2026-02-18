@@ -1,6 +1,6 @@
-package edu.ucne.anderson_nunez_ap2_p1.presentation.list
+package edu.ucne.anderson_nunez_ap2_p1.presentation.metas.list
 
-import edu.ucne.anderson_nunez_ap2_p1.domain.model.Meta
+import edu.ucne.anderson_nunez_ap2_p1.domain.metas.model.Meta
 
 data class ListMetaUiState(
     val isLoading: Boolean = true,

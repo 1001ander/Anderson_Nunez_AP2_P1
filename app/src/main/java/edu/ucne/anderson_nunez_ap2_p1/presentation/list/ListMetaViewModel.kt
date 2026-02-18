@@ -1,9 +1,10 @@
-package edu.ucne.anderson_nunez_ap2_p1.presentation.list
+package edu.ucne.anderson_nunez_ap2_p1.presentation.metas.list
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import edu.ucne.anderson_nunez_ap2_p1.domain.usecase.ObserveMetasUseCase
+import edu.ucne.anderson_nunez_ap2_p1.domain.metas.usecase.DeleteMetaUseCase
+import edu.ucne.anderson_nunez_ap2_p1.domain.metas.usecase.ObserveMetasUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -12,7 +13,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ListMetaViewModel @Inject constructor(
-    private val observeMetasUseCase: ObserveMetasUseCase
+    private val observeMetasUseCase: ObserveMetasUseCase,
+    private val deleteMetaUseCase: DeleteMetaUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ListMetaUiState())
@@ -42,6 +44,9 @@ class ListMetaViewModel @Inject constructor(
                 }
                 getMetas()
             }
+            is ListMetaUiEvent.DeleteMeta -> {
+                deleteMeta(event.id)
+            }
         }
     }
 
@@ -63,6 +68,12 @@ class ListMetaViewModel @Inject constructor(
                     )
                 }
             }
+        }
+    }
+
+    private fun deleteMeta(id: Int) {
+        viewModelScope.launch {
+            deleteMetaUseCase(id)
         }
     }
 }
